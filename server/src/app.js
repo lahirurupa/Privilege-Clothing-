@@ -10,6 +10,15 @@ import {
   requireAdmin
 } from "./middleware/authMiddleware.js";
 
+import productRoutes
+  from "./routes/productRoutes.js";
+
+import adminProductRoutes
+  from "./routes/adminProductRoutes.js";
+
+import categoryRoutes
+  from "./routes/categoryRoutes.js";
+
 import { supabase } from "./config/supabase.js";
 
 const app = express();
@@ -183,6 +192,44 @@ app.get(
   }
 );
 
+
+
+/*
+|--------------------------------------------------------------------------
+| Categories
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/categories",
+  categoryRoutes
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Products
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/products",
+  productRoutes
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Admin Products
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/admin/products",
+  adminProductRoutes
+);
+
+
 /*
 |--------------------------------------------------------------------------
 | 404
@@ -205,24 +252,84 @@ app.use((req, res) => {
 |--------------------------------------------------------------------------
 */
 
-app.use((error, req, res, next) => {
+app.use(
+  (
+    error,
+    req,
+    res,
+    next
+  ) => {
 
-  console.error(error);
+    console.error(
+      "GLOBAL ERROR:",
+      error
+    );
 
-  res.status(
-    error.status || 500
-  ).json({
 
-    success: false,
+    /*
+    |--------------------------------------------------------------------------
+    | Multer errors
+    |--------------------------------------------------------------------------
+    */
 
-    message:
-      process.env.NODE_ENV === "production"
-        ? "Something went wrong"
-        : error.message
+    if (
+      error.code ===
+      "LIMIT_FILE_SIZE"
+    ) {
 
-  });
+      return res.status(400).json({
 
-});
+        success: false,
+
+        message:
+          "Each image must be 3 MB or smaller"
+
+      });
+
+    }
+
+
+    if (
+      error.code ===
+      "LIMIT_FILE_COUNT"
+    ) {
+
+      return res.status(400).json({
+
+        success: false,
+
+        message:
+          "Maximum 5 images are allowed"
+
+      });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Normal errors
+    |--------------------------------------------------------------------------
+    */
+
+    return res
+      .status(
+        error.status || 500
+      )
+      .json({
+
+        success: false,
+
+        message:
+          process.env.NODE_ENV ===
+          "production"
+            ? "Something went wrong"
+            : error.message
+
+      });
+
+  }
+);
 
 
 export default app;
