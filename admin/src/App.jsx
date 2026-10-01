@@ -18,6 +18,15 @@ import Dashboard
 import Products
   from "./pages/Products";
 
+import AddProduct
+  from "./pages/AddProduct";
+
+import EditProduct
+  from "./pages/EditProduct";
+
+import Inventory
+  from "./pages/Inventory";
+
 
 function App() {
 
@@ -65,7 +74,29 @@ function App() {
           }
         />
 
-      </Route>
+        <Route
+          path="products/new"
+          element={
+            <AddProduct />
+          }
+        />
+
+        <Route
+          path="products/:id/edit"
+          element={
+            <EditProduct />
+          }
+        />
+
+        </Route>
+
+        <Route
+          path="inventory"
+          element={
+            <Inventory />
+          }
+        />
+
 
 
       {/* UNKNOWN ROUTE */}

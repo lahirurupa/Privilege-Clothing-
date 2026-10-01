@@ -4,6 +4,10 @@ import {
   useState
 } from "react";
 
+import {
+  useNavigate
+} from "react-router-dom";
+
 import api from "../services/api";
 
 
@@ -31,6 +35,10 @@ function Products() {
     search,
     setSearch
   ] = useState("");
+
+
+  const navigate =
+  useNavigate();
 
 
   /*
@@ -288,16 +296,14 @@ function Products() {
 
 
         <button
-          className="primary-button"
-          onClick={() => {
-
-            alert(
-              "We will build Add Product in the next step."
-            );
-
-          }}
-        >
-          + Add Product
+            className="primary-button"
+            onClick={() =>
+                navigate(
+                "/products/new"
+                )
+            }
+            >
+            + Add Product
         </button>
 
       </div>
@@ -589,6 +595,17 @@ function Products() {
                                 }
                               >
                                 Delete
+                              </button>
+
+                              <button
+                                className="small-button"
+                                onClick={() =>
+                                    navigate(
+                                    `/products/${product.id}/edit`
+                                    )
+                                }
+                              >
+                                Edit
                               </button>
 
                             </div>
