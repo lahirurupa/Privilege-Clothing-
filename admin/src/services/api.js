@@ -2,17 +2,13 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-
-  headers: {
-    "Content-Type": "application/json"
-  }
+  baseURL: import.meta.env.VITE_API_URL
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| Attach JWT automatically
+| Attach JWT
 |--------------------------------------------------------------------------
 */
 
@@ -33,6 +29,34 @@ api.interceptors.request.use(
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Important for file uploads
+    |--------------------------------------------------------------------------
+    |
+    | Let the browser automatically generate:
+    |
+    | multipart/form-data; boundary=.....
+    |
+    */
+
+    if (
+      config.data instanceof FormData
+    ) {
+
+      delete config.headers[
+        "Content-Type"
+      ];
+
+    } else {
+
+      config.headers[
+        "Content-Type"
+      ] = "application/json";
+
+    }
+
+
     return config;
 
   },
@@ -44,7 +68,7 @@ api.interceptors.request.use(
 
 /*
 |--------------------------------------------------------------------------
-| Handle expired / invalid JWT
+| Handle invalid / expired JWT
 |--------------------------------------------------------------------------
 */
 
