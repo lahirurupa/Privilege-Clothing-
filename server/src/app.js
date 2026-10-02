@@ -19,6 +19,9 @@ import adminProductRoutes
 import categoryRoutes
   from "./routes/categoryRoutes.js";
 
+import adminUserRoutes
+  from "./routes/adminUserRoutes.js";
+
 import { supabase } from "./config/supabase.js";
 
 const app = express();
@@ -229,6 +232,11 @@ app.use(
   adminProductRoutes
 );
 
+
+app.use(
+  "/api/admin/users",
+  adminUserRoutes
+);
 
 /*
 |--------------------------------------------------------------------------

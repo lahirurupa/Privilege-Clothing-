@@ -27,6 +27,9 @@ import EditProduct
 import Inventory
   from "./pages/Inventory";
 
+import Users
+  from "./pages/Users";
+
 
 function App() {
 
@@ -88,14 +91,23 @@ function App() {
           }
         />
 
-        </Route>
-
         <Route
           path="inventory"
           element={
             <Inventory />
           }
         />
+
+        <Route
+          path="users"
+          element={
+            <Users />
+          }
+        />
+
+        </Route>
+
+        
 
 
 
@@ -109,6 +121,8 @@ function App() {
           </div>
         }
       />
+
+      
 
     </Routes>
 

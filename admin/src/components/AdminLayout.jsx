@@ -93,18 +93,30 @@ function AdminLayout() {
           </NavLink>
 
 
-          <div
-            className="nav-link disabled"
+          <NavLink
+            to="/inventory"
+            className={
+                ({ isActive }) =>
+                isActive
+                    ? "nav-link active"
+                    : "nav-link"
+            }
           >
             Inventory
-          </div>
+          </NavLink>
 
 
-          <div
-            className="nav-link disabled"
+          <NavLink
+            to="/users"
+            className={
+              ({ isActive }) =>
+                isActive
+                  ? "nav-link active"
+                  : "nav-link"
+            }
           >
             Users
-          </div>
+          </NavLink>
 
 
           <div
