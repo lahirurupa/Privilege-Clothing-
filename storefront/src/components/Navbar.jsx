@@ -20,13 +20,10 @@
 //     logout
 //   } = useAuth();
 
-//   const {
-//     cartItems
-//   } = useCart();
 
 //   const {
-//   cartCount
-// } = useCart();
+//     cartCount
+//   } = useCart();
 
 
 //   const navigate =
@@ -37,7 +34,13 @@
 
 //     logout();
 
-//     navigate("/");
+
+//     navigate(
+//       "/",
+//       {
+//         replace: true
+//       }
+//     );
 
 //   }
 
@@ -52,6 +55,8 @@
 //         className="store-nav"
 //       >
 
+//         {/* LOGO */}
+
 //         <Link
 //           to="/"
 //           className="store-logo"
@@ -59,6 +64,8 @@
 //           PRIVILEGE
 //         </Link>
 
+
+//         {/* MAIN NAVIGATION */}
 
 //         <nav
 //           className="store-menu"
@@ -81,6 +88,8 @@
 //         </nav>
 
 
+//         {/* ACCOUNT */}
+
 //         <div
 //           className="store-actions"
 //         >
@@ -91,6 +100,37 @@
 
 //                 <>
 
+//                   <Link
+//                     to="/orders"
+//                   >
+//                     My Orders
+//                   </Link>
+
+
+//                   <Link
+//                     to="/cart"
+//                     className="cart-link"
+//                   >
+
+//                     Cart
+
+
+//                     {
+//                       cartCount >
+//                       0 && (
+
+//                         <span
+//                           className="cart-count"
+//                         >
+//                           {cartCount}
+//                         </span>
+
+//                       )
+//                     }
+
+//                   </Link>
+
+
 //                   <span
 //                     className="customer-name"
 //                   >
@@ -99,6 +139,7 @@
 
 
 //                   <button
+//                     type="button"
 //                     onClick={
 //                       handleLogout
 //                     }
@@ -133,21 +174,6 @@
 //               )
 //           }
 
-
-//           <Link
-//             to="/cart"
-//             className="cart-link"
-//           >
-//             Cart
-//             {
-//                 cartCount > 0 && (
-//                     <span className="cart-count">
-//                         {cartCount}
-//                     </span>
-//                 )
-//             }
-//           </Link>
-
 //         </div>
 
 //       </div>
@@ -167,10 +193,15 @@
 
 
 
+import {
+  useEffect,
+  useState
+} from "react";
 
 import {
   Link,
   NavLink,
+  useLocation,
   useNavigate
 } from "react-router-dom";
 
@@ -200,9 +231,42 @@ function Navbar() {
     useNavigate();
 
 
+  const location =
+    useLocation();
+
+
+  const [
+    mobileMenuOpen,
+    setMobileMenuOpen
+  ] = useState(false);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Close Mobile Menu When Route Changes
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+
+    setMobileMenuOpen(false);
+
+  }, [
+    location.pathname
+  ]);
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Logout
+  |--------------------------------------------------------------------------
+  */
+
   function handleLogout() {
 
     logout();
+
+    setMobileMenuOpen(false);
 
 
     navigate(
@@ -210,6 +274,22 @@ function Navbar() {
       {
         replace: true
       }
+    );
+
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Toggle Mobile Menu
+  |--------------------------------------------------------------------------
+  */
+
+  function toggleMobileMenu() {
+
+    setMobileMenuOpen(
+      current =>
+        !current
     );
 
   }
@@ -225,7 +305,9 @@ function Navbar() {
         className="store-nav"
       >
 
-        {/* LOGO */}
+        {/* =====================================================
+            LOGO
+        ====================================================== */}
 
         <Link
           to="/"
@@ -235,10 +317,12 @@ function Navbar() {
         </Link>
 
 
-        {/* MAIN NAVIGATION */}
+        {/* =====================================================
+            DESKTOP NAVIGATION
+        ====================================================== */}
 
         <nav
-          className="store-menu"
+          className="store-menu desktop-menu"
         >
 
           <NavLink
@@ -258,10 +342,12 @@ function Navbar() {
         </nav>
 
 
-        {/* ACCOUNT */}
+        {/* =====================================================
+            DESKTOP ACCOUNT AREA
+        ====================================================== */}
 
         <div
-          className="store-actions"
+          className="store-actions desktop-actions"
         >
 
           {
@@ -292,7 +378,12 @@ function Navbar() {
                         <span
                           className="cart-count"
                         >
-                          {cartCount}
+                          {
+                            cartCount >
+                            99
+                              ? "99+"
+                              : cartCount
+                          }
                         </span>
 
                       )
@@ -303,8 +394,13 @@ function Navbar() {
 
                   <span
                     className="customer-name"
+                    title={
+                      user.name
+                    }
                   >
-                    {user.name}
+                    {
+                      user.name
+                    }
                   </span>
 
 
@@ -345,6 +441,210 @@ function Navbar() {
           }
 
         </div>
+
+
+        {/* =====================================================
+            MOBILE RIGHT AREA
+        ====================================================== */}
+
+        <div
+          className="mobile-nav-actions"
+        >
+
+          {
+            user &&
+            cartCount >
+              0 && (
+
+              <Link
+                to="/cart"
+                className="mobile-cart-link"
+                aria-label="Shopping cart"
+              >
+
+                Cart
+
+                <span
+                  className="cart-count"
+                >
+                  {
+                    cartCount >
+                    99
+                      ? "99+"
+                      : cartCount
+                  }
+                </span>
+
+              </Link>
+
+            )
+          }
+
+
+          <button
+            type="button"
+            className={
+              mobileMenuOpen
+                ? "hamburger-button open"
+                : "hamburger-button"
+            }
+            onClick={
+              toggleMobileMenu
+            }
+            aria-label={
+              mobileMenuOpen
+                ? "Close menu"
+                : "Open menu"
+            }
+            aria-expanded={
+              mobileMenuOpen
+            }
+          >
+
+            <span />
+
+            <span />
+
+            <span />
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          MOBILE MENU
+      ====================================================== */}
+
+      <div
+        className={
+          mobileMenuOpen
+            ? "mobile-menu open"
+            : "mobile-menu"
+        }
+      >
+
+        <nav
+          className="mobile-menu-links"
+        >
+
+          <NavLink
+            to="/"
+            end
+          >
+            Home
+          </NavLink>
+
+
+          <NavLink
+            to="/shop"
+          >
+            Shop
+          </NavLink>
+
+
+          {
+            user
+              ? (
+
+                <>
+
+                  <NavLink
+                    to="/orders"
+                  >
+                    My Orders
+                  </NavLink>
+
+
+                  <NavLink
+                    to="/cart"
+                    className="mobile-cart-menu-link"
+                  >
+
+                    <span>
+                      Cart
+                    </span>
+
+
+                    {
+                      cartCount >
+                      0 && (
+
+                        <span
+                          className="mobile-cart-number"
+                        >
+                          {
+                            cartCount
+                          }
+                        </span>
+
+                      )
+                    }
+
+                  </NavLink>
+
+
+                  <div
+                    className="mobile-customer"
+                  >
+
+                    <span>
+                      Signed in as
+                    </span>
+
+
+                    <strong
+                      title={
+                        user.name
+                      }
+                    >
+                      {
+                        user.name
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    className="mobile-logout-button"
+                    onClick={
+                      handleLogout
+                    }
+                  >
+                    Logout
+                  </button>
+
+                </>
+
+              )
+              : (
+
+                <>
+
+                  <NavLink
+                    to="/login"
+                  >
+                    Login
+                  </NavLink>
+
+
+                  <NavLink
+                    to="/register"
+                    className="mobile-register"
+                  >
+                    Register
+                  </NavLink>
+
+                </>
+
+              )
+          }
+
+        </nav>
 
       </div>
 

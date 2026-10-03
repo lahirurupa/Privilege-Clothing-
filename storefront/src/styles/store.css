@@ -34,7 +34,7 @@ select {
 
 /* HEADER */
 
-.store-header {
+/* .store-header {
   position: sticky;
 
   top: 0;
@@ -45,9 +45,24 @@ select {
 
   border-bottom:
     1px solid #eee;
+} */
+
+.store-header {
+  position: sticky;
+
+  top: 0;
+
+  z-index: 1000;
+
+  width: 100%;
+
+  background: #fff;
+
+  border-bottom:
+    1px solid #eee;
 }
 
-.store-nav {
+/* .store-nav {
   max-width: 1400px;
 
   margin: auto;
@@ -62,25 +77,96 @@ select {
 
   justify-content:
     space-between;
+} */
+
+.store-nav {
+  width: 100%;
+
+  max-width: 1400px;
+
+  height: 75px;
+
+  margin: 0 auto;
+
+  padding:
+    0 30px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 30px;
 }
 
-.store-logo {
+/* .store-logo {
   font-size: 22px;
 
   font-weight: 800;
 
   letter-spacing: 4px;
+} */
+
+.store-logo {
+  flex-shrink: 0;
+
+  color: #111;
+
+  font-size: 22px;
+
+  font-weight: 800;
+
+  letter-spacing: 4px;
+
+  text-decoration: none;
+
+  white-space: nowrap;
 }
+
+/* .store-menu {
+  display: flex;
+
+  gap: 30px;
+} */
 
 .store-menu {
   display: flex;
 
+  align-items: center;
+
   gap: 30px;
+
+  margin-left: auto;
 }
 
-.store-menu a {
+/* .store-menu a {
   color: #555;
+} */
+
+.store-menu a {
+  position: relative;
+
+  color: #555;
+
+  font-size: 14px;
+
+  text-decoration: none;
+
+  white-space: nowrap;
+
+  transition:
+    color 0.2s ease;
 }
+
+
+.store-menu a:hover {
+  color: #111;
+}
+
+/* .store-menu a.active {
+  color: #111;
+
+  font-weight: 600;
+} */
 
 .store-menu a.active {
   color: #111;
@@ -88,7 +174,7 @@ select {
   font-weight: 600;
 }
 
-.store-actions {
+/* .store-actions {
   display: flex;
 
   align-items: center;
@@ -96,27 +182,546 @@ select {
   gap: 15px;
 
   font-size: 14px;
+} */
+
+.store-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 16px;
+
+  min-width: 0;
+
+  font-size: 14px;
 }
 
-.nav-register {
+.store-actions a {
+  white-space: nowrap;
+}
+
+/* .nav-register {
   padding: 9px 14px;
 
   background: #111;
 
   color: white;
+} */
+
+.nav-register {
+  padding:
+    9px 14px;
+
+  background: #111;
+
+  color: #fff !important;
+
+  border-radius: 5px;
 }
 
-.nav-text-button {
+/* .nav-text-button {
   border: none;
 
   background: none;
 
   cursor: pointer;
+} */
+
+.nav-text-button {
+  padding: 0;
+
+  border: none;
+
+  background: none;
+
+  color: #555;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  white-space: nowrap;
 }
 
+.nav-text-button:hover {
+  color: #111;
+}
+
+/* .customer-name {
+  font-weight: 600;
+} */
+
 .customer-name {
+  display: block;
+
+  max-width: 150px;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #555;
+
   font-weight: 600;
 }
+
+
+.cart-link {
+  position: relative;
+
+  display: inline-flex;
+
+  align-items: center;
+}
+
+
+.cart-count {
+  position: absolute;
+
+  top: -11px;
+
+  right: -14px;
+
+  min-width: 18px;
+
+  height: 18px;
+
+  padding:
+    0 4px;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 20px;
+
+  background: #111;
+
+  color: #fff;
+
+  font-size: 9px;
+
+  font-weight: 700;
+
+  line-height: 1;
+}
+
+
+/* =========================================================
+   MOBILE CONTROLS
+========================================================= */
+
+.mobile-nav-actions {
+  display: none;
+
+  margin-left: auto;
+
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+.mobile-cart-link {
+  position: relative;
+
+  color: #111;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+
+/* =========================================================
+   HAMBURGER
+========================================================= */
+
+.hamburger-button {
+  width: 38px;
+
+  height: 38px;
+
+  padding: 7px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  border: none;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+
+.hamburger-button span {
+  width: 23px;
+
+  height: 2px;
+
+  display: block;
+
+  background: #111;
+
+  transition:
+    transform 0.25s ease,
+    opacity 0.2s ease;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Hamburger → X
+|--------------------------------------------------------------------------
+*/
+
+.hamburger-button.open span:nth-child(1) {
+  transform:
+    translateY(7px)
+    rotate(45deg);
+}
+
+
+.hamburger-button.open span:nth-child(2) {
+  opacity: 0;
+}
+
+
+.hamburger-button.open span:nth-child(3) {
+  transform:
+    translateY(-7px)
+    rotate(-45deg);
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+.mobile-menu {
+  max-height: 0;
+
+  overflow: hidden;
+
+  background: #fff;
+
+  border-top:
+    0 solid #eee;
+
+  opacity: 0;
+
+  visibility: hidden;
+
+  transition:
+    max-height 0.3s ease,
+    opacity 0.2s ease,
+    border 0.2s ease;
+}
+
+
+.mobile-menu.open {
+  max-height: 550px;
+
+  opacity: 1;
+
+  visibility: visible;
+
+  border-top-width: 1px;
+}
+
+
+.mobile-menu-links {
+  max-width: 1400px;
+
+  margin: auto;
+
+  padding:
+    8px 20px
+    20px;
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.mobile-menu-links > a {
+  min-height: 51px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  border-bottom:
+    1px solid #eee;
+
+  color: #333;
+
+  font-size: 15px;
+
+  text-decoration: none;
+}
+
+
+.mobile-menu-links > a.active {
+  color: #111;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   MOBILE CART
+========================================================= */
+
+.mobile-cart-menu-link {
+  display: flex !important;
+
+  justify-content:
+    space-between !important;
+}
+
+
+.mobile-cart-number {
+  min-width: 25px;
+
+  padding:
+    4px 7px;
+
+  text-align: center;
+
+  border-radius: 20px;
+
+  background: #111;
+
+  color: white;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   MOBILE CUSTOMER
+========================================================= */
+
+.mobile-customer {
+  padding:
+    18px 0;
+
+  border-bottom:
+    1px solid #eee;
+}
+
+
+.mobile-customer span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #888;
+
+  font-size: 11px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.6px;
+}
+
+
+.mobile-customer strong {
+  display: block;
+
+  max-width: 100%;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  color: #111;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   MOBILE LOGOUT
+========================================================= */
+
+.mobile-logout-button {
+  width: 100%;
+
+  margin-top: 15px;
+
+  padding: 13px;
+
+  border:
+    1px solid #111;
+
+  border-radius: 5px;
+
+  background: #111;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+
+.mobile-register {
+  margin-top: 12px;
+
+  min-height: 44px !important;
+
+  justify-content: center !important;
+
+  border: none !important;
+
+  border-radius: 5px;
+
+  background: #111;
+
+  color: white !important;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (
+  max-width: 1000px
+) {
+
+  .customer-name {
+    max-width: 100px;
+  }
+
+
+  .store-nav {
+    gap: 18px;
+
+    padding:
+      0 20px;
+  }
+
+
+  .store-menu {
+    gap: 20px;
+  }
+
+
+  .store-actions {
+    gap: 11px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (
+  max-width: 760px
+) {
+
+  .store-nav {
+    height: 68px;
+
+    padding:
+      0 15px;
+  }
+
+
+  .store-logo {
+    font-size: 18px;
+
+    letter-spacing: 3px;
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Hide Desktop Navigation
+  |--------------------------------------------------------------------------
+  */
+
+  .desktop-menu,
+  .desktop-actions {
+    display: none;
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Show Hamburger
+  |--------------------------------------------------------------------------
+  */
+
+  .mobile-nav-actions {
+    display: flex;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (
+  max-width: 380px
+) {
+
+  .store-logo {
+    font-size: 15px;
+
+    letter-spacing: 2px;
+  }
+
+
+  .mobile-cart-link {
+    font-size: 12px;
+  }
+
+
+  .store-nav {
+    gap: 8px;
+
+    padding:
+      0 10px;
+  }
+
+}
+
+
+
+
+
+
+
 
 
 /* MAIN */
