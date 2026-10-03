@@ -119,11 +119,17 @@ function AdminLayout() {
           </NavLink>
 
 
-          <div
-            className="nav-link disabled"
+          <NavLink
+            to="/orders"
+            className={
+              ({ isActive }) =>
+                isActive
+                  ? "nav-link active"
+                  : "nav-link"
+            }
           >
             Orders
-          </div>
+          </NavLink>
 
         </nav>
 

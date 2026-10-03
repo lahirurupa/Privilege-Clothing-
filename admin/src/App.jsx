@@ -30,6 +30,9 @@ import Inventory
 import Users
   from "./pages/Users";
 
+import Orders
+  from "./pages/Orders";
+
 
 function App() {
 
@@ -105,7 +108,14 @@ function App() {
           }
         />
 
-        </Route>
+        <Route
+          path="orders"
+          element={
+            <Orders />
+          }
+        />
+
+      </Route>
 
         
 

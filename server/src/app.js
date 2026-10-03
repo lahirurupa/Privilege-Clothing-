@@ -1,30 +1,47 @@
 import express from "express";
+
 import cors from "cors";
+
 import helmet from "helmet";
+
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
-import authRoutes from "./routes/authRoutes.js";
+
+import rateLimit
+  from "express-rate-limit";
+
 
 import {
-  authenticate,
-  requireAdmin
-} from "./middleware/authMiddleware.js";
+  supabase
+} from "./config/supabase.js";
 
-import productRoutes
-  from "./routes/productRoutes.js";
 
-import adminProductRoutes
-  from "./routes/adminProductRoutes.js";
+import authRoutes
+  from "./routes/authRoutes.js";
 
 import categoryRoutes
   from "./routes/categoryRoutes.js";
 
+import productRoutes
+  from "./routes/productRoutes.js";
+
+import cartRoutes
+  from "./routes/cartRoutes.js";
+
+import orderRoutes
+  from "./routes/orderRoutes.js";
+
+import adminProductRoutes
+  from "./routes/adminProductRoutes.js";
+
 import adminUserRoutes
   from "./routes/adminUserRoutes.js";
 
-import { supabase } from "./config/supabase.js";
+import adminOrderRoutes
+  from "./routes/adminOrderRoutes.js";
 
-const app = express();
+
+const app =
+  express();
 
 
 /*
@@ -33,7 +50,9 @@ const app = express();
 |--------------------------------------------------------------------------
 */
 
-app.use(helmet());
+app.use(
+  helmet()
+);
 
 
 /*
@@ -43,34 +62,74 @@ app.use(helmet());
 */
 
 const allowedOrigins = [
+
   process.env.ADMIN_ORIGIN,
+
   process.env.STOREFRONT_ORIGIN
+
 ];
+
 
 app.use(
   cors({
-    origin: function (origin, callback) {
 
-      // Allows Postman and similar tools
-      if (!origin) {
-        return callback(null, true);
+    origin:
+      function (
+        origin,
+        callback
+      ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Postman / Server Tools
+        |--------------------------------------------------------------------------
+        */
+
+        if (!origin) {
+
+          return callback(
+            null,
+            true
+          );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Allowed Web Apps
+        |--------------------------------------------------------------------------
+        */
+
+        if (
+          allowedOrigins.includes(
+            origin
+          )
+        ) {
+
+          return callback(
+            null,
+            true
+          );
+
+        }
+
+
+        return callback(
+          new Error(
+            "Not allowed by CORS"
+          )
+        );
+
       }
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(
-        new Error("Not allowed by CORS")
-      );
-    }
   })
 );
 
 
 /*
 |--------------------------------------------------------------------------
-| Body parser
+| JSON
 |--------------------------------------------------------------------------
 */
 
@@ -87,7 +146,9 @@ app.use(
 |--------------------------------------------------------------------------
 */
 
-app.use(morgan("dev"));
+app.use(
+  morgan("dev")
+);
 
 
 /*
@@ -96,17 +157,28 @@ app.use(morgan("dev"));
 |--------------------------------------------------------------------------
 */
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+const apiLimiter =
+  rateLimit({
 
-  limit: 500,
+    windowMs:
+      15 * 60 * 1000,
 
-  standardHeaders: "draft-8",
+    limit:
+      500,
 
-  legacyHeaders: false
-});
+    standardHeaders:
+      "draft-8",
 
-app.use("/api", apiLimiter);
+    legacyHeaders:
+      false
+
+  });
+
+
+app.use(
+  "/api",
+  apiLimiter
+);
 
 
 /*
@@ -115,58 +187,102 @@ app.use("/api", apiLimiter);
 |--------------------------------------------------------------------------
 */
 
-app.get("/api/health", (req, res) => {
+app.get(
+  "/api/health",
+  (
+    req,
+    res
+  ) => {
 
-  res.status(200).json({
-    success: true,
-    message: "Clothing Store API is running"
-  });
+    res.status(200).json({
 
-});
+      success: true,
+
+      message:
+        "Clothing Store API is running"
+
+    });
+
+  }
+);
 
 
 /*
 |--------------------------------------------------------------------------
-| Database Connection Test
+| Database Test
 |--------------------------------------------------------------------------
 */
 
-app.get("/api/test-db", async (req, res) => {
+app.get(
+  "/api/test-db",
+  async (
+    req,
+    res
+  ) => {
 
-  try {
+    try {
 
-    const { data, error } = await supabase
-      .from("categories")
-      .select("id, name, slug")
-      .limit(10);
+      const {
+        data,
+        error
+      } = await supabase
+        .from("categories")
+        .select(
+          "id, name, slug"
+        )
+        .limit(10);
 
-    if (error) {
-      throw error;
+
+      if (error) {
+
+        throw error;
+
+      }
+
+
+      return res.json({
+
+        success: true,
+
+        message:
+          "Supabase database connected successfully",
+
+        categories:
+          data
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "DATABASE TEST ERROR:",
+        error
+      );
+
+
+      return res
+        .status(500)
+        .json({
+
+          success: false,
+
+          message:
+            "Unable to connect to Supabase database"
+
+        });
+
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Supabase database connected successfully",
-      categories: data
-    });
-
-  } catch (error) {
-
-    console.error(
-      "Database connection error:",
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message:
-        "Unable to connect to Supabase database"
-    });
-
   }
+);
 
-});
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC / CUSTOMER ROUTES
+|--------------------------------------------------------------------------
+*/
 
 app.use(
   "/api/auth",
@@ -174,46 +290,11 @@ app.use(
 );
 
 
-
-app.get(
-  "/api/admin/test",
-  authenticate,
-  requireAdmin,
-  (req, res) => {
-
-    res.status(200).json({
-      success: true,
-      message:
-        "Welcome administrator",
-      user: {
-        id: req.user.id,
-        name: req.user.name,
-        role: req.user.role
-      }
-    });
-
-  }
-);
-
-
-
-/*
-|--------------------------------------------------------------------------
-| Categories
-|--------------------------------------------------------------------------
-*/
-
 app.use(
   "/api/categories",
   categoryRoutes
 );
 
-
-/*
-|--------------------------------------------------------------------------
-| Public Products
-|--------------------------------------------------------------------------
-*/
 
 app.use(
   "/api/products",
@@ -223,7 +304,31 @@ app.use(
 
 /*
 |--------------------------------------------------------------------------
-| Admin Products
+| CUSTOMER CART
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/cart",
+  cartRoutes
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER ORDERS
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/orders",
+  orderRoutes
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN ROUTES
 |--------------------------------------------------------------------------
 */
 
@@ -238,20 +343,40 @@ app.use(
   adminUserRoutes
 );
 
+app.use(
+  "/api/admin/orders",
+  adminOrderRoutes
+);
+
 /*
 |--------------------------------------------------------------------------
 | 404
 |--------------------------------------------------------------------------
+|
+| IMPORTANT:
+| Always keep this AFTER all application routes.
+|
 */
 
-app.use((req, res) => {
+app.use(
+  (
+    req,
+    res
+  ) => {
 
-  res.status(404).json({
-    success: false,
-    message: "API route not found"
-  });
+    return res
+      .status(404)
+      .json({
 
-});
+        success: false,
+
+        message:
+          "API route not found"
+
+      });
+
+  }
+);
 
 
 /*
@@ -276,7 +401,7 @@ app.use(
 
     /*
     |--------------------------------------------------------------------------
-    | Multer errors
+    | Multer File Size
     |--------------------------------------------------------------------------
     */
 
@@ -285,44 +410,55 @@ app.use(
       "LIMIT_FILE_SIZE"
     ) {
 
-      return res.status(400).json({
+      return res
+        .status(400)
+        .json({
 
-        success: false,
+          success: false,
 
-        message:
-          "Each image must be 3 MB or smaller"
+          message:
+            "Each image must be 3 MB or smaller"
 
-      });
-
-    }
-
-
-    if (
-      error.code ===
-      "LIMIT_FILE_COUNT"
-    ) {
-
-      return res.status(400).json({
-
-        success: false,
-
-        message:
-          "Maximum 5 images are allowed"
-
-      });
+        });
 
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Normal errors
+    | Multer Maximum Images
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      error.code ===
+      "LIMIT_FILE_COUNT"
+    ) {
+
+      return res
+        .status(400)
+        .json({
+
+          success: false,
+
+          message:
+            "Maximum 5 images are allowed"
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Generic Error
     |--------------------------------------------------------------------------
     */
 
     return res
       .status(
-        error.status || 500
+        error.status ||
+        500
       )
       .json({
 

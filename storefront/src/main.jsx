@@ -17,6 +17,10 @@ import {
   AuthProvider
 } from "./context/AuthContext.jsx";
 
+import {
+  CartProvider
+} from "./context/CartContext.jsx";
+
 import "./styles/store.css";
 
 
@@ -32,7 +36,11 @@ createRoot(
 
       <AuthProvider>
 
-        <App />
+        <CartProvider>
+
+          <App />
+
+        </CartProvider>
 
       </AuthProvider>
 
