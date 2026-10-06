@@ -52,7 +52,7 @@ function AdminLayout() {
         >
 
           <h2>
-            PRIVILEGE
+            PREVILEGE
           </h2>
 
           <span>

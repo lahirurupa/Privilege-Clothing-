@@ -296,6 +296,32 @@ app.use(
 );
 
 
+/*
+|--------------------------------------------------------------------------
+| Prevent stale dynamic API responses
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  "/api/products",
+  (
+    req,
+    res,
+    next
+  ) => {
+
+    res.set(
+      "Cache-Control",
+      "no-store"
+    );
+
+
+    next();
+
+  }
+);
+
+
 app.use(
   "/api/products",
   productRoutes

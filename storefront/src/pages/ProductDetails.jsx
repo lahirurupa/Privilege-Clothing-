@@ -5,19 +5,12 @@
 // } from "react";
 
 // import {
+//   useLocation,
+//   useNavigate,
 //   useParams
 // } from "react-router-dom";
 
-// import {
-//   useCart
-// } from "../context/CartContext";
-
 // import api from "../services/api";
-
-// import {
-//   useLocation,
-//   useNavigate
-// } from "react-router-dom";
 
 // import {
 //   useAuth
@@ -35,6 +28,24 @@
 //   } = useParams();
 
 
+//   const {
+//     user
+//   } = useAuth();
+
+
+//   const {
+//     addToCart
+//   } = useCart();
+
+
+//   const navigate =
+//     useNavigate();
+
+
+//   const location =
+//     useLocation();
+
+
 //   const [
 //     product,
 //     setProduct
@@ -48,6 +59,12 @@
 
 
 //   const [
+//     error,
+//     setError
+//   ] = useState("");
+
+
+//   const [
 //     selectedColor,
 //     setSelectedColor
 //   ] = useState("");
@@ -58,39 +75,6 @@
 //     setSelectedSize
 //   ] = useState("");
 
-//   const {
-//     user
-//   } = useAuth();
-
-//   const {
-//     addToCart
-//   } = useCart();
-
-
-//   const navigate =
-//   useNavigate();
-
-
-// const location =
-//   useLocation();
-
-
-// const [
-//   addingToCart,
-//   setAddingToCart
-// ] = useState(false);
-
-
-// const [
-//   cartMessage,
-//   setCartMessage
-// ] = useState("");
-
-//   const [
-//     addedMessage,
-//     setAddedMessage
-//   ] = useState("");
-
 
 //   const [
 //     selectedImage,
@@ -98,11 +82,40 @@
 //   ] = useState("");
 
 
+//   const [
+//     addingToCart,
+//     setAddingToCart
+//   ] = useState(false);
+
+
+//   const [
+//     cartMessage,
+//     setCartMessage
+//   ] = useState("");
+
+
+//   const [
+//     cartError,
+//     setCartError
+//   ] = useState("");
+
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Load Product
+//   |--------------------------------------------------------------------------
+//   */
+
 //   useEffect(() => {
 
 //     async function loadProduct() {
 
 //       try {
+
+//         setLoading(true);
+
+//         setError("");
+
 
 //         const response =
 //           await api.get(
@@ -117,6 +130,12 @@
 //         setProduct(data);
 
 
+//         /*
+//         |--------------------------------------------------------------------------
+//         | Default Image
+//         |--------------------------------------------------------------------------
+//         */
+
 //         const images =
 //           [
 //             ...(data.images || [])
@@ -128,7 +147,7 @@
 
 
 //         if (
-//           images.length
+//           images.length > 0
 //         ) {
 
 //           setSelectedImage(
@@ -138,12 +157,29 @@
 //         }
 
 
+//         /*
+//         |--------------------------------------------------------------------------
+//         | Default Color
+//         |--------------------------------------------------------------------------
+//         */
+
+//         const activeVariants =
+//           (
+//             data.variants ||
+//             []
+//           ).filter(
+//             variant =>
+//               variant.is_active
+//           );
+
+
 //         if (
-//           data.variants?.length
+//           activeVariants.length >
+//           0
 //         ) {
 
 //           setSelectedColor(
-//             data.variants[0]
+//             activeVariants[0]
 //               .color_name
 //           );
 
@@ -152,7 +188,19 @@
 
 //       } catch (error) {
 
-//         console.error(error);
+//         console.error(
+//           "LOAD PRODUCT ERROR:",
+//           error
+//         );
+
+
+//         setError(
+//           error.response
+//             ?.data
+//             ?.message ||
+//           "Unable to load product."
+//         );
+
 
 //       } finally {
 
@@ -168,15 +216,50 @@
 //   }, [id]);
 
 
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Product Images
+//   |--------------------------------------------------------------------------
+//   */
+
+//   const images =
+//     useMemo(() => {
+
+//       if (!product) {
+
+//         return [];
+
+//       }
+
+
+//       return [
+//         ...(product.images || [])
+//       ].sort(
+//         (a, b) =>
+//           a.display_order -
+//           b.display_order
+//       );
+
+//     }, [product]);
+
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Colors
+//   |--------------------------------------------------------------------------
+//   */
+
 //   const colors =
 //     useMemo(() => {
 
 //       if (!product) {
+
 //         return [];
+
 //       }
 
 
-//       const map =
+//       const colorMap =
 //         new Map();
 
 
@@ -186,19 +269,30 @@
 //       ) {
 
 //         if (
-//           !map.has(
+//           !variant.is_active
+//         ) {
+
+//           continue;
+
+//         }
+
+
+//         if (
+//           !colorMap.has(
 //             variant.color_name
 //           )
 //         ) {
 
-//           map.set(
+//           colorMap.set(
 //             variant.color_name,
 //             {
+
 //               name:
 //                 variant.color_name,
 
 //               hex:
 //                 variant.color_hex
+
 //             }
 //           );
 
@@ -208,11 +302,17 @@
 
 
 //       return Array.from(
-//         map.values()
+//         colorMap.values()
 //       );
 
 //     }, [product]);
 
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Sizes for Selected Color
+//   |--------------------------------------------------------------------------
+//   */
 
 //   const sizes =
 //     useMemo(() => {
@@ -227,10 +327,14 @@
 //       }
 
 
-//       return product.variants.filter(
+//       return (
+//         product.variants ||
+//         []
+//       ).filter(
 //         variant =>
+//           variant.is_active &&
 //           variant.color_name ===
-//           selectedColor
+//             selectedColor
 //       );
 
 //     }, [
@@ -238,6 +342,12 @@
 //       selectedColor
 //     ]);
 
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Selected Variant
+//   |--------------------------------------------------------------------------
+//   */
 
 //   const selectedVariant =
 //     useMemo(() => {
@@ -253,13 +363,17 @@
 //       }
 
 
-//       return product.variants.find(
+//       return (
+//         product.variants ||
+//         []
+//       ).find(
 //         variant =>
+//           variant.is_active &&
 //           variant.color_name ===
 //             selectedColor &&
 //           variant.size ===
 //             selectedSize
-//       );
+//       ) || null;
 
 //     }, [
 //       product,
@@ -267,6 +381,12 @@
 //       selectedSize
 //     ]);
 
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Currency
+//   |--------------------------------------------------------------------------
+//   */
 
 //   function formatPrice(
 //     price
@@ -285,40 +405,151 @@
 //   }
 
 
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Add to Cart
+//   |--------------------------------------------------------------------------
+//   */
+
+//   async function handleAddToCart() {
+
+//     if (!selectedVariant) {
+
+//       return;
+
+//     }
+
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Customer must login first
+//     |--------------------------------------------------------------------------
+//     */
+
+//     if (!user) {
+
+//       navigate(
+//         "/login",
+//         {
+//           state: {
+//             from:
+//               `${location.pathname}${location.search}`
+//           }
+//         }
+//       );
+
+//       return;
+
+//     }
+
+
+//     try {
+
+//       setAddingToCart(true);
+
+//       setCartMessage("");
+
+//       setCartError("");
+
+
+//       await addToCart(
+//         selectedVariant.id,
+//         1
+//       );
+
+
+//       setCartMessage(
+//         "Item added to your cart."
+//       );
+
+
+//       setTimeout(
+//         () => {
+
+//           setCartMessage("");
+
+//         },
+//         2500
+//       );
+
+
+//     } catch (error) {
+
+//       console.error(
+//         "ADD TO CART ERROR:",
+//         error
+//       );
+
+
+//       setCartError(
+//         error.message ||
+//         "Unable to add item to cart."
+//       );
+
+
+//     } finally {
+
+//       setAddingToCart(false);
+
+//     }
+
+//   }
+
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Loading
+//   |--------------------------------------------------------------------------
+//   */
+
 //   if (loading) {
 
 //     return (
-//       <div
+
+//       <section
 //         className="store-section"
 //       >
 //         Loading product...
-//       </div>
+//       </section>
+
 //     );
 
 //   }
 
 
-//   if (!product) {
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Error
+//   |--------------------------------------------------------------------------
+//   */
+
+//   if (
+//     error ||
+//     !product
+//   ) {
 
 //     return (
-//       <div
+
+//       <section
 //         className="store-section"
 //       >
-//         Product not found.
-//       </div>
+
+//         <div
+//           className="store-error"
+//         >
+
+//           {
+//             error ||
+//             "Product not found."
+//           }
+
+//         </div>
+
+//       </section>
+
 //     );
 
 //   }
-
-
-//   const images =
-//     [
-//       ...(product.images || [])
-//     ].sort(
-//       (a, b) =>
-//         a.display_order -
-//         b.display_order
-//     );
 
 
 //   return (
@@ -331,7 +562,9 @@
 //         className="product-details-layout"
 //       >
 
-//         {/* IMAGES */}
+//         {/* =====================================================
+//             PRODUCT GALLERY
+//         ====================================================== */}
 
 //         <div
 //           className="product-gallery"
@@ -369,53 +602,62 @@
 //           </div>
 
 
-//           <div
-//             className="product-thumbnails"
-//           >
+//           {
+//             images.length > 1 && (
 
-//             {
-//               images.map(
-//                 image => (
+//               <div
+//                 className="product-thumbnails"
+//               >
 
-//                   <button
-//                     key={
-//                       image.id
-//                     }
-//                     onClick={() =>
-//                       setSelectedImage(
-//                         image.public_url
-//                       )
-//                     }
-//                     className={
-//                       selectedImage ===
-//                       image.public_url
-//                         ? "thumbnail active"
-//                         : "thumbnail"
-//                     }
-//                   >
+//                 {
+//                   images.map(
+//                     image => (
 
-//                     <img
-//                       src={
-//                         image.public_url
-//                       }
-//                       alt={
-//                         image.alt_text ||
-//                         product.name
-//                       }
-//                     />
+//                       <button
+//                         type="button"
+//                         key={
+//                           image.id
+//                         }
+//                         className={
+//                           selectedImage ===
+//                           image.public_url
+//                             ? "thumbnail active"
+//                             : "thumbnail"
+//                         }
+//                         onClick={() =>
+//                           setSelectedImage(
+//                             image.public_url
+//                           )
+//                         }
+//                       >
 
-//                   </button>
+//                         <img
+//                           src={
+//                             image.public_url
+//                           }
+//                           alt={
+//                             image.alt_text ||
+//                             product.name
+//                           }
+//                         />
 
-//                 )
-//               )
-//             }
+//                       </button>
 
-//           </div>
+//                     )
+//                   )
+//                 }
+
+//               </div>
+
+//             )
+//           }
 
 //         </div>
 
 
-//         {/* DETAILS */}
+//         {/* =====================================================
+//             PRODUCT INFORMATION
+//         ====================================================== */}
 
 //         <div
 //           className="product-detail-info"
@@ -424,9 +666,13 @@
 //           <span
 //             className="product-category"
 //           >
+
 //             {
-//               product.category?.name
+//               product.category
+//                 ?.name ||
+//               "Clothing"
 //             }
+
 //           </span>
 
 
@@ -438,24 +684,36 @@
 //           <div
 //             className="product-detail-price"
 //           >
+
 //             {
 //               formatPrice(
 //                 product.price
 //               )
 //             }
+
 //           </div>
 
 
-//           <p
-//             className="product-description"
-//           >
-//             {
-//               product.description
-//             }
-//           </p>
+//           {
+//             product.description && (
+
+//               <p
+//                 className="product-description"
+//               >
+
+//                 {
+//                   product.description
+//                 }
+
+//               </p>
+
+//             )
+//           }
 
 
-//           {/* COLOR */}
+//           {/* =====================================================
+//               COLOR
+//           ====================================================== */}
 
 //           <div
 //             className="product-option"
@@ -475,6 +733,7 @@
 //                   color => (
 
 //                     <button
+//                       type="button"
 //                       key={
 //                         color.name
 //                       }
@@ -492,6 +751,10 @@
 
 //                         setSelectedSize("");
 
+//                         setCartMessage("");
+
+//                         setCartError("");
+
 //                       }}
 //                     >
 
@@ -499,11 +762,13 @@
 //                         style={{
 //                           background:
 //                             color.hex ||
-//                             "#ddd"
+//                             "#dddddd"
 //                         }}
 //                       />
 
-//                       {color.name}
+//                       {
+//                         color.name
+//                       }
 
 //                     </button>
 
@@ -516,7 +781,9 @@
 //           </div>
 
 
-//           {/* SIZE */}
+//           {/* =====================================================
+//               SIZE
+//           ====================================================== */}
 
 //           <div
 //             className="product-option"
@@ -533,37 +800,52 @@
 
 //               {
 //                 sizes.map(
-//                   variant => (
+//                   variant => {
 
-//                     <button
-//                       key={
-//                         variant.id
-//                       }
-//                       disabled={
-//                         Number(
-//                           variant.quantity
-//                         ) === 0
-//                       }
-//                       className={
-//                         selectedSize ===
-//                         variant.size
-//                           ? "size-option selected"
-//                           : "size-option"
-//                       }
-//                       onClick={() =>
-//                         setSelectedSize(
+//                     const outOfStock =
+//                       Number(
+//                         variant.quantity
+//                       ) <= 0;
+
+
+//                     return (
+
+//                       <button
+//                         type="button"
+//                         key={
+//                           variant.id
+//                         }
+//                         disabled={
+//                           outOfStock
+//                         }
+//                         className={
+//                           selectedSize ===
 //                           variant.size
-//                         )
-//                       }
-//                     >
+//                             ? "size-option selected"
+//                             : "size-option"
+//                         }
+//                         onClick={() => {
 
-//                       {
-//                         variant.size
-//                       }
+//                           setSelectedSize(
+//                             variant.size
+//                           );
 
-//                     </button>
+//                           setCartMessage("");
 
-//                   )
+//                           setCartError("");
+
+//                         }}
+//                       >
+
+//                         {
+//                           variant.size
+//                         }
+
+//                       </button>
+
+//                     );
+
+//                   }
 //                 )
 //               }
 
@@ -571,6 +853,10 @@
 
 //           </div>
 
+
+//           {/* =====================================================
+//               STOCK INFORMATION
+//           ====================================================== */}
 
 //           {
 //             selectedVariant && (
@@ -587,7 +873,7 @@
 //                     : Number(
 //                         selectedVariant.quantity
 //                       ) > 0
-//                       ? `Only ${selectedVariant.quantity} left`
+//                       ? `Only ${selectedVariant.quantity} left in stock`
 //                       : "Out of stock"
 //                 }
 
@@ -596,95 +882,68 @@
 //             )
 //           }
 
+
+//           {/* =====================================================
+//               CART MESSAGES
+//           ====================================================== */}
+
 //           {
-//             addedMessage && (
-//                 <div className="cart-success-message">
-//                     {addedMessage}
-//                 </div>
+//             cartMessage && (
+
+//               <div
+//                 className="cart-success-message"
+//               >
+//                 {cartMessage}
+//               </div>
+
 //             )
 //           }
 
 
+//           {
+//             cartError && (
+
+//               <div
+//                 className="store-error"
+//               >
+//                 {cartError}
+//               </div>
+
+//             )
+//           }
+
+
+//           {/* =====================================================
+//               ADD TO CART
+//           ====================================================== */}
+
 //           <button
+//             type="button"
 //             className="add-cart-button"
 //             disabled={
 //               !selectedVariant ||
 //               Number(
 //                 selectedVariant.quantity
-//               ) === 0
+//               ) <= 0 ||
+//               addingToCart
 //             }
-//             onClick={() => {
-
-//                 if (!selectedVariant) {
-//                     return;
-//                 }
-
-
-//                 const firstImage =
-//                     images[0];
-
-
-//                 addToCart({
-
-//                     productId:
-//                     product.id,
-
-//                     variantId:
-//                     selectedVariant.id,
-
-//                     productName:
-//                     product.name,
-
-//                     price:
-//                     Number(
-//                         product.price
-//                     ),
-
-//                     image:
-//                     firstImage?.public_url ||
-//                     "",
-
-//                     colorName:
-//                     selectedVariant.color_name,
-
-//                     colorHex:
-//                     selectedVariant.color_hex,
-
-//                     size:
-//                     selectedVariant.size,
-
-//                     sku:
-//                     selectedVariant.sku,
-
-//                     quantity:
-//                     1,
-
-//                     availableStock:
-//                     Number(
-//                         selectedVariant.quantity
-//                     )
-
-//                 });
-
-
-//                 setAddedMessage(
-//                     "Added to cart"
-//                 );
-
-
-//                 setTimeout(
-//                     () =>
-//                     setAddedMessage(""),
-//                     1600
-//                 );
-
-//                 }}
+//             onClick={
+//               handleAddToCart
+//             }
 //           >
 
 //             {
-//               selectedVariant
-//                 ? "Add to Cart"
-//                 : "Select a Size"
+//               addingToCart
+//                 ? "Adding..."
+//                 : !selectedVariant
+//                   ? "Select a Size"
+//                   : Number(
+//                       selectedVariant.quantity
+//                     ) <= 0
+//                     ? "Out of Stock"
+//                     : user
+//                       ? "Add to Cart"
+//                       : "Login to Add to Cart"
 //             }
 
 //           </button>
@@ -701,6 +960,8 @@
 
 
 // export default ProductDetails;
+
+
 
 
 
@@ -789,6 +1050,18 @@ function ProductDetails() {
   ] = useState("");
 
 
+  /*
+  |--------------------------------------------------------------------------
+  | Quantity
+  |--------------------------------------------------------------------------
+  */
+
+  const [
+    quantity,
+    setQuantity
+  ] = useState(1);
+
+
   const [
     addingToCart,
     setAddingToCart
@@ -843,22 +1116,28 @@ function ProductDetails() {
         |--------------------------------------------------------------------------
         */
 
-        const images =
+        const productImages =
           [
             ...(data.images || [])
           ].sort(
             (a, b) =>
-              a.display_order -
-              b.display_order
+              Number(
+                a.display_order
+              ) -
+              Number(
+                b.display_order
+              )
           );
 
 
         if (
-          images.length > 0
+          productImages.length >
+          0
         ) {
 
           setSelectedImage(
-            images[0].public_url
+            productImages[0]
+              .public_url
           );
 
         }
@@ -866,7 +1145,7 @@ function ProductDetails() {
 
         /*
         |--------------------------------------------------------------------------
-        | Default Color
+        | Active Variants
         |--------------------------------------------------------------------------
         */
 
@@ -879,6 +1158,12 @@ function ProductDetails() {
               variant.is_active
           );
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | Default Color
+        |--------------------------------------------------------------------------
+        */
 
         if (
           activeVariants.length >
@@ -943,8 +1228,12 @@ function ProductDetails() {
         ...(product.images || [])
       ].sort(
         (a, b) =>
-          a.display_order -
-          b.display_order
+          Number(
+            a.display_order
+          ) -
+          Number(
+            b.display_order
+          )
       );
 
     }, [product]);
@@ -952,7 +1241,7 @@ function ProductDetails() {
 
   /*
   |--------------------------------------------------------------------------
-  | Colors
+  | Available Colors
   |--------------------------------------------------------------------------
   */
 
@@ -1017,7 +1306,7 @@ function ProductDetails() {
 
   /*
   |--------------------------------------------------------------------------
-  | Sizes for Selected Color
+  | Available Sizes for Selected Color
   |--------------------------------------------------------------------------
   */
 
@@ -1091,6 +1380,75 @@ function ProductDetails() {
 
   /*
   |--------------------------------------------------------------------------
+  | Maximum Quantity
+  |--------------------------------------------------------------------------
+  |
+  | Backend allows maximum 20 items per variant.
+  |
+  */
+
+  const maxQuantity =
+    selectedVariant
+      ? Math.min(
+          Number(
+            selectedVariant.quantity
+          ),
+          20
+        )
+      : 1;
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Reset / Clamp Quantity when variant changes
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+
+    if (!selectedVariant) {
+
+      setQuantity(1);
+
+      return;
+
+    }
+
+
+    const stock =
+      Number(
+        selectedVariant.quantity
+      );
+
+
+    if (
+      stock <= 0
+    ) {
+
+      setQuantity(1);
+
+      return;
+
+    }
+
+
+    setQuantity(
+      current =>
+        Math.max(
+          1,
+          Math.min(
+            current,
+            stock,
+            20
+          )
+        )
+    );
+
+  }, [selectedVariant]);
+
+
+  /*
+  |--------------------------------------------------------------------------
   | Currency
   |--------------------------------------------------------------------------
   */
@@ -1114,6 +1472,115 @@ function ProductDetails() {
 
   /*
   |--------------------------------------------------------------------------
+  | Increase Quantity
+  |--------------------------------------------------------------------------
+  */
+
+  function increaseQuantity() {
+
+    if (!selectedVariant) {
+
+      return;
+
+    }
+
+
+    setQuantity(
+      current =>
+        Math.min(
+          current + 1,
+          maxQuantity
+        )
+    );
+
+
+    setCartMessage("");
+
+    setCartError("");
+
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Decrease Quantity
+  |--------------------------------------------------------------------------
+  */
+
+  function decreaseQuantity() {
+
+    setQuantity(
+      current =>
+        Math.max(
+          1,
+          current - 1
+        )
+    );
+
+
+    setCartMessage("");
+
+    setCartError("");
+
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
+  | Quantity Input
+  |--------------------------------------------------------------------------
+  */
+
+  function handleQuantityInput(
+    event
+  ) {
+
+    if (!selectedVariant) {
+
+      return;
+
+    }
+
+
+    const value =
+      Number(
+        event.target.value
+      );
+
+
+    if (
+      !Number.isFinite(value)
+    ) {
+
+      return;
+
+    }
+
+
+    const safeQuantity =
+      Math.max(
+        1,
+        Math.min(
+          Math.floor(value),
+          maxQuantity
+        )
+      );
+
+
+    setQuantity(
+      safeQuantity
+    );
+
+
+    setCartMessage("");
+
+    setCartError("");
+
+  }
+
+
+  /*
+  |--------------------------------------------------------------------------
   | Add to Cart
   |--------------------------------------------------------------------------
   */
@@ -1129,7 +1596,7 @@ function ProductDetails() {
 
     /*
     |--------------------------------------------------------------------------
-    | Customer must login first
+    | Customer must login
     |--------------------------------------------------------------------------
     */
 
@@ -1150,6 +1617,33 @@ function ProductDetails() {
     }
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Final Quantity Validation
+    |--------------------------------------------------------------------------
+    */
+
+    const availableStock =
+      Number(
+        selectedVariant.quantity
+      );
+
+
+    if (
+      quantity < 1 ||
+      quantity >
+        availableStock
+    ) {
+
+      setCartError(
+        "Please select a valid quantity."
+      );
+
+      return;
+
+    }
+
+
     try {
 
       setAddingToCart(true);
@@ -1159,15 +1653,34 @@ function ProductDetails() {
       setCartError("");
 
 
+      /*
+      |--------------------------------------------------------------------------
+      | Send selected quantity
+      |--------------------------------------------------------------------------
+      */
+
       await addToCart(
         selectedVariant.id,
-        1
+        quantity
       );
 
 
       setCartMessage(
-        "Item added to your cart."
+        `${quantity} ${
+          quantity === 1
+            ? "item"
+            : "items"
+        } added to your cart.`
       );
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | Reset Quantity
+      |--------------------------------------------------------------------------
+      */
+
+      setQuantity(1);
 
 
       setTimeout(
@@ -1407,11 +1920,9 @@ function ProductDetails() {
               <p
                 className="product-description"
               >
-
                 {
                   product.description
                 }
-
               </p>
 
             )
@@ -1457,6 +1968,8 @@ function ProductDetails() {
                         );
 
                         setSelectedSize("");
+
+                        setQuantity(1);
 
                         setCartMessage("");
 
@@ -1537,6 +2050,8 @@ function ProductDetails() {
                             variant.size
                           );
 
+                          setQuantity(1);
+
                           setCartMessage("");
 
                           setCartError("");
@@ -1583,6 +2098,141 @@ function ProductDetails() {
                       ? `Only ${selectedVariant.quantity} left in stock`
                       : "Out of stock"
                 }
+
+              </div>
+
+            )
+          }
+
+
+          {/* =====================================================
+              QUANTITY
+          ====================================================== */}
+
+          {
+            selectedVariant &&
+            Number(
+              selectedVariant.quantity
+            ) > 0 && (
+
+              <div
+                className="product-quantity-section"
+              >
+
+                <label
+                  className="product-quantity-label"
+                >
+                  Quantity
+                </label>
+
+
+                <div
+                  className="product-quantity-row"
+                >
+
+                  <div
+                    className="quantity-selector"
+                  >
+
+                    {/* DECREASE */}
+
+                    <button
+                      type="button"
+                      className="quantity-button"
+                      onClick={
+                        decreaseQuantity
+                      }
+                      disabled={
+                        quantity <= 1
+                      }
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+
+
+                    {/* INPUT */}
+
+                    <input
+                      type="number"
+                      className="quantity-input"
+                      min="1"
+                      max={
+                        maxQuantity
+                      }
+                      value={
+                        quantity
+                      }
+                      onChange={
+                        handleQuantityInput
+                      }
+                      aria-label="Product quantity"
+                    />
+
+
+                    {/* INCREASE */}
+
+                    <button
+                      type="button"
+                      className="quantity-button"
+                      onClick={
+                        increaseQuantity
+                      }
+                      disabled={
+                        quantity >=
+                        maxQuantity
+                      }
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+
+                  </div>
+
+
+                  <span
+                    className="quantity-limit"
+                  >
+                    Max {maxQuantity}
+                  </span>
+
+                </div>
+
+              </div>
+
+            )
+          }
+
+
+          {/* =====================================================
+              SELECTED TOTAL
+          ====================================================== */}
+
+          {
+            selectedVariant &&
+            Number(
+              selectedVariant.quantity
+            ) > 0 && (
+
+              <div
+                className="selected-product-total"
+              >
+
+                <span>
+                  Total
+                </span>
+
+
+                <strong>
+                  {
+                    formatPrice(
+                      Number(
+                        product.price
+                      ) *
+                      quantity
+                    )
+                  }
+                </strong>
 
               </div>
 
@@ -1649,7 +2299,11 @@ function ProductDetails() {
                     ) <= 0
                     ? "Out of Stock"
                     : user
-                      ? "Add to Cart"
+                      ? (
+                        quantity === 1
+                          ? "Add to Cart"
+                          : `Add ${quantity} to Cart`
+                      )
                       : "Login to Add to Cart"
             }
 

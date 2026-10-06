@@ -66,23 +66,193 @@ const PRODUCT_SELECT = `
 |
 */
 
+// export async function getProducts(
+//   req,
+//   res
+// ) {
+
+//   try {
+
+//     const page =
+//       Math.max(
+//         Number(req.query.page) || 1,
+//         1
+//       );
+
+//     const limit =
+//       Math.min(
+//         Math.max(
+//           Number(req.query.limit) || 20,
+//           1
+//         ),
+//         50
+//       );
+
+
+//     const from =
+//       (page - 1) * limit;
+
+//     const to =
+//       from + limit - 1;
+
+
+//     let query = supabase
+//       .from("products")
+//       .select(
+//         PRODUCT_SELECT,
+//         {
+//           count: "exact"
+//         }
+//       )
+//       .eq("is_active", true)
+//       .order(
+//         "created_at",
+//         {
+//           ascending: false
+//         }
+//       )
+//       .range(from, to);
+
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Search
+//     |--------------------------------------------------------------------------
+//     */
+
+//     if (req.query.search) {
+
+//       query = query.ilike(
+//         "name",
+//         `%${req.query.search}%`
+//       );
+
+//     }
+
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Category filter
+//     |--------------------------------------------------------------------------
+//     */
+
+//     if (req.query.category_id) {
+
+//       query = query.eq(
+//         "category_id",
+//         req.query.category_id
+//       );
+
+//     }
+
+
+//     const {
+//       data,
+//       error,
+//       count
+//     } = await query;
+
+
+//     if (error) {
+
+//       console.error(
+//         "GET PRODUCTS ERROR:",
+//         error
+//       );
+
+//       return res.status(500).json({
+//         success: false,
+//         message:
+//           "Unable to retrieve products"
+//       });
+
+//     }
+
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Hide inactive variants
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const products =
+//       data.map(product => ({
+
+//         ...product,
+
+//         variants:
+//           product.variants.filter(
+//             variant =>
+//               variant.is_active
+//           )
+
+//       }));
+
+
+//     return res.status(200).json({
+
+//       success: true,
+
+//       pagination: {
+//         page,
+//         limit,
+//         total: count,
+//         pages:
+//           Math.ceil(
+//             count / limit
+//           )
+//       },
+
+//       products
+
+//     });
+
+
+//   } catch (error) {
+
+//     console.error(
+//       "GET PRODUCTS ERROR:",
+//       error
+//     );
+
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error"
+//     });
+
+//   }
+
+// }
+
 export async function getProducts(
   req,
-  res
+  res,
+  next
 ) {
 
   try {
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination
+    |--------------------------------------------------------------------------
+    */
+
     const page =
       Math.max(
-        Number(req.query.page) || 1,
+        parseInt(
+          req.query.page
+        ) || 1,
         1
       );
+
 
     const limit =
       Math.min(
         Math.max(
-          Number(req.query.limit) || 20,
+          parseInt(
+            req.query.limit
+          ) || 20,
           1
         ),
         50
@@ -90,28 +260,61 @@ export async function getProducts(
 
 
     const from =
-      (page - 1) * limit;
+      (page - 1) *
+      limit;
+
 
     const to =
-      from + limit - 1;
+      from +
+      limit -
+      1;
 
 
-    let query = supabase
-      .from("products")
-      .select(
-        PRODUCT_SELECT,
-        {
-          count: "exact"
-        }
-      )
-      .eq("is_active", true)
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      )
-      .range(from, to);
+    /*
+    |--------------------------------------------------------------------------
+    | Optional Filters
+    |--------------------------------------------------------------------------
+    */
+
+    const search =
+      req.query.search
+        ?.trim() || "";
+
+
+    const categoryId =
+      req.query.category_id
+        ?.trim() || "";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Public Products Query
+    |--------------------------------------------------------------------------
+    |
+    | IMPORTANT:
+    | Newest products appear first.
+    |
+    */
+
+    let query =
+      supabase
+        .from("products")
+        .select(
+          PRODUCT_SELECT,
+          {
+            count: "exact"
+          }
+        )
+        .eq(
+          "is_active",
+          true
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
 
     /*
@@ -120,31 +323,52 @@ export async function getProducts(
     |--------------------------------------------------------------------------
     */
 
-    if (req.query.search) {
+    if (search) {
 
-      query = query.ilike(
-        "name",
-        `%${req.query.search}%`
-      );
+      query =
+        query.ilike(
+          "name",
+          `%${search}%`
+        );
 
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Category filter
+    | Category
     |--------------------------------------------------------------------------
     */
 
-    if (req.query.category_id) {
+    if (categoryId) {
 
-      query = query.eq(
-        "category_id",
-        req.query.category_id
-      );
+      query =
+        query.eq(
+          "category_id",
+          categoryId
+        );
 
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination
+    |--------------------------------------------------------------------------
+    */
+
+    query =
+      query.range(
+        from,
+        to
+      );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Execute
+    |--------------------------------------------------------------------------
+    */
 
     const {
       data,
@@ -155,75 +379,92 @@ export async function getProducts(
 
     if (error) {
 
-      console.error(
-        "GET PRODUCTS ERROR:",
-        error
-      );
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Unable to retrieve products"
-      });
+      throw error;
 
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Hide inactive variants
+    | Remove inactive variants from public response
     |--------------------------------------------------------------------------
     */
 
     const products =
-      data.map(product => ({
+      (
+        data || []
+      ).map(
+        product => ({
 
-        ...product,
+          ...product,
 
-        variants:
-          product.variants.filter(
-            variant =>
-              variant.is_active
-          )
+          variants:
+            (
+              product.variants ||
+              []
+            ).filter(
+              variant =>
+                variant.is_active
+            ),
 
-      }));
+          images:
+            [
+              ...(product.images || [])
+            ].sort(
+              (a, b) =>
+                Number(
+                  a.display_order
+                ) -
+                Number(
+                  b.display_order
+                )
+            )
+
+        })
+      );
 
 
-    return res.status(200).json({
+    /*
+    |--------------------------------------------------------------------------
+    | Response
+    |--------------------------------------------------------------------------
+    */
 
-      success: true,
+    return res
+      .status(200)
+      .json({
 
-      pagination: {
-        page,
-        limit,
-        total: count,
-        pages:
-          Math.ceil(
-            count / limit
-          )
-      },
+        success: true,
 
-      products
+        products,
 
-    });
+        pagination: {
+
+          page,
+
+          limit,
+
+          total:
+            count || 0,
+
+          pages:
+            Math.ceil(
+              (count || 0) /
+              limit
+            )
+
+        }
+
+      });
 
 
   } catch (error) {
 
-    console.error(
-      "GET PRODUCTS ERROR:",
-      error
-    );
-
-    return res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    next(error);
 
   }
 
 }
-
 
 /*
 |--------------------------------------------------------------------------
