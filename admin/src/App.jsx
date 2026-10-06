@@ -33,6 +33,9 @@ import Users
 import Orders
   from "./pages/Orders";
 
+import Categories
+  from "./pages/Categories";
+
 
 function App() {
 
@@ -77,6 +80,13 @@ function App() {
           path="products"
           element={
             <Products />
+          }
+        />
+
+        <Route
+          path="categories"
+          element={
+            <Categories />
           }
         />
 

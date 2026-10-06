@@ -674,3 +674,348 @@ export async function updateUserStatus(
   }
 
 }
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| CUSTOMER ORDER ACTIVITY REPORT
+|--------------------------------------------------------------------------
+|
+| GET /api/admin/users/order-summary
+|
+| Examples:
+|
+| /api/admin/users/order-summary?min_orders=1
+|
+| /api/admin/users/order-summary?min_orders=5
+|
+| /api/admin/users/order-summary
+|   ?min_orders=3
+|   &from=2026-09-01T00:00:00.000Z
+|   &to=2026-10-01T00:00:00.000Z
+|
+*/
+
+export async function getCustomerOrderSummary(
+  req,
+  res
+) {
+
+  try {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Minimum Orders
+    |--------------------------------------------------------------------------
+    */
+
+    const minOrders =
+      Number.parseInt(
+        req.query.min_orders ??
+        "1",
+        10
+      );
+
+
+    if (
+      !Number.isInteger(
+        minOrders
+      ) ||
+      minOrders < 0 ||
+      minOrders > 100000
+    ) {
+
+      return res
+        .status(400)
+        .json({
+
+          success: false,
+
+          message:
+            "min_orders must be a valid number greater than or equal to 0"
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Date Range
+    |--------------------------------------------------------------------------
+    */
+
+    const from =
+      req.query.from
+        ?.trim() ||
+      null;
+
+
+    const to =
+      req.query.to
+        ?.trim() ||
+      null;
+
+
+    let fromDate =
+      null;
+
+
+    let toDate =
+      null;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validate From
+    |--------------------------------------------------------------------------
+    */
+
+    if (from) {
+
+      fromDate =
+        new Date(from);
+
+
+      if (
+        Number.isNaN(
+          fromDate.getTime()
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+
+            success: false,
+
+            message:
+              "Invalid start date"
+
+          });
+
+      }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validate To
+    |--------------------------------------------------------------------------
+    */
+
+    if (to) {
+
+      toDate =
+        new Date(to);
+
+
+      if (
+        Number.isNaN(
+          toDate.getTime()
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+
+            success: false,
+
+            message:
+              "Invalid end date"
+
+          });
+
+      }
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Validate Date Order
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      fromDate &&
+      toDate &&
+      fromDate >=
+        toDate
+    ) {
+
+      return res
+        .status(400)
+        .json({
+
+          success: false,
+
+          message:
+            "End date must be after start date"
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Run PostgreSQL Report
+    |--------------------------------------------------------------------------
+    */
+
+    const {
+      data,
+      error
+    } = await supabase.rpc(
+      "admin_customer_order_summary",
+      {
+
+        p_from:
+          fromDate
+            ? fromDate.toISOString()
+            : null,
+
+        p_to:
+          toDate
+            ? toDate.toISOString()
+            : null,
+
+        p_min_orders:
+          minOrders
+
+      }
+    );
+
+
+    if (error) {
+
+      console.error(
+        "CUSTOMER ORDER SUMMARY ERROR:",
+        error
+      );
+
+
+      return res
+        .status(500)
+        .json({
+
+          success: false,
+
+          message:
+            "Unable to retrieve customer order activity"
+
+        });
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Statistics
+    |--------------------------------------------------------------------------
+    */
+
+    const customers =
+      data || [];
+
+
+    const totalOrders =
+      customers.reduce(
+        (
+          total,
+          customer
+        ) =>
+          total +
+          Number(
+            customer.order_count ||
+            0
+          ),
+        0
+      );
+
+
+    const totalSpent =
+      customers.reduce(
+        (
+          total,
+          customer
+        ) =>
+          total +
+          Number(
+            customer.total_spent ||
+            0
+          ),
+        0
+      );
+
+
+    return res
+      .status(200)
+      .json({
+
+        success: true,
+
+        filters: {
+
+          from:
+            fromDate
+              ?.toISOString() ||
+            null,
+
+          to:
+            toDate
+              ?.toISOString() ||
+            null,
+
+          min_orders:
+            minOrders
+
+        },
+
+        stats: {
+
+          customers:
+            customers.length,
+
+          orders:
+            totalOrders,
+
+          revenue:
+            totalSpent
+
+        },
+
+        customers
+
+      });
+
+
+  } catch (error) {
+
+    console.error(
+      "CUSTOMER ORDER SUMMARY ERROR:",
+      error
+    );
+
+
+    return res
+      .status(500)
+      .json({
+
+        success: false,
+
+        message:
+          "Server error while retrieving customer order activity"
+
+      });
+
+  }
+
+}

@@ -39,6 +39,9 @@ import adminUserRoutes
 import adminOrderRoutes
   from "./routes/adminOrderRoutes.js";
 
+import adminCategoryRoutes
+  from "./routes/adminCategoryRoutes.js";
+
 
 const app =
   express();
@@ -372,6 +375,11 @@ app.use(
 app.use(
   "/api/admin/orders",
   adminOrderRoutes
+);
+
+app.use(
+  "/api/admin/categories",
+  adminCategoryRoutes
 );
 
 /*

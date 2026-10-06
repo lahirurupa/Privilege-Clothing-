@@ -81,6 +81,19 @@ function AdminLayout() {
 
 
           <NavLink
+            to="/categories"
+            className={
+              ({ isActive }) =>
+                isActive
+                  ? "nav-link active"
+                  : "nav-link"
+            }
+          >
+            Categories
+          </NavLink>
+
+
+          <NavLink
             to="/products"
             className={
               ({ isActive }) =>

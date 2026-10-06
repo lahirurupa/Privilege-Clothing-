@@ -13,7 +13,7 @@ function Footer() {
         <div>
 
           <h3>
-            PRIVILEGE
+            PREVILEGE
           </h3>
 
           <p>
@@ -26,7 +26,7 @@ function Footer() {
         <div>
 
           <strong>
-            Privilege Clothing
+            Previlege Clothing
           </strong>
 
           <p>
