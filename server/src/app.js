@@ -36,6 +36,9 @@ import adminProductRoutes
 import adminUserRoutes
   from "./routes/adminUserRoutes.js";
 
+import accountRoutes
+  from "./routes/accountRoutes.js";
+
 import adminOrderRoutes
   from "./routes/adminOrderRoutes.js";
 
@@ -370,6 +373,11 @@ app.use(
 app.use(
   "/api/admin/users",
   adminUserRoutes
+);
+
+app.use(
+  "/api/account",
+  accountRoutes
 );
 
 app.use(
